@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
+from tkinter.filedialog import *
 
 #functions
 my_address_book = {}
@@ -22,7 +23,7 @@ def update():
     if key == "":
         messagebox.showinfo("Error","Name cannot be empty")
     else:
-        if key not in my_address_book.keys:
+        if key not in my_address_book.keys():
             alist.insert(END,key)
         my_address_book[key] = (address_ent.get(),mobile_ent.get(),email_ent.get())
         clear_all()
@@ -54,14 +55,34 @@ def display(event):
     contact = ""
     if index:
         key = alist.get(index)
-        contact = "NAME  :  "+ key + "/n/n"
+        contact = "NAME  :  "+ key + "\n\n"
         details = my_address_book[key]
-        contact += "ADDRESS  :  "+ details[0] + "/n"
-        contact += "MOBILE  :  "+ details[1] + "/n"
-        contact += "EMAIL  :  "+ details[2] + "/n"
+        contact += "ADDRESS  :  "+ details[0] + "\n"
+        contact += "MOBILE  :  "+ details[1] + "\n"
+        contact += "EMAIL  :  "+ details[2] + "\n"
     label = Label(newWin)
     label.grid(row=0,column=0)
     label.config(text=contact)
+
+def save():
+    fout = asksaveasfile(defaultextension = ".txt")
+    if fout:
+        print(my_address_book,file= fout)
+        reset()
+    else:
+        messagebox.showwarning("Warning","Address Book not saved")
+
+def open():
+    global  my_address_book
+    reset()
+    fin = askopenfile(title="Open File")
+    if fin:
+        my_address_book = eval(fin.read())
+        for key in my_address_book.keys():
+            alist.insert(END, key)
+        title.configure(text=os.path.basename(fin.name))
+    else:
+        messagebox.showwarning("Warning","No file was opened")
 
 
 window = Tk()
@@ -70,11 +91,12 @@ window.title("Address Book")
 title = Label(window,text="My Address Book:",width=35)
 title.grid(row=0,column=1,columnspan=2,padx=5,pady=15)
 
-open_btn = Button(window,text="Open",width=40)
+open_btn = Button(window,text="Open",width=40,command=open)
 open_btn.grid(row=0,column=3,padx=5,pady=5)
 
 alist = Listbox(window,width=30,height=32)
 alist.grid(row=2,column=0,padx=5,pady=5,columnspan=3,rowspan=5)
+alist.bind('<<ListboxSelect>>', display)
 
 name = Label(window,text="Name:")
 name_ent = Entry(window)
@@ -96,16 +118,16 @@ email_ent = Entry(window)
 email.grid(row=5,column=3,padx=5)
 email_ent.grid(row=5,column=4,padx=5)
 
-save = Button(window,text="Save",width=40)
-save.grid(row=8,column=1,padx=5,pady=5,columnspan=4)
+save_btn = Button(window,text="Save",width=40,command=save)
+save_btn.grid(row=8,column=1,padx=5,pady=5,columnspan=4)
 
-edit = Button(window,text="Edit",width=20)
-edit.grid(row=7,column=0,padx=5,pady=5,columnspan=4)
+edit_btn = Button(window,text="Edit",width=20,command=edit)
+edit_btn.grid(row=7,column=0,padx=5,pady=5,columnspan=4)
 
-delete = Button(window,text="Delete",width=20)
-delete.grid(row=7,column=2,padx=5,pady=5,columnspan=4)
+delete_btn = Button(window,text="Delete",width=20,command=delete)
+delete_btn.grid(row=7,column=2,padx=5,pady=5,columnspan=4)
 
-add = Button(window,text="Update/Add",width=20)
+add = Button(window,text="Update/Add",width=20,command=update)
 add.grid(row=7,column=4,padx=5,pady=5,columnspan=4)
 
 window.mainloop()
